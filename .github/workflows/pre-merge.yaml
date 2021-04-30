@@ -22,12 +22,15 @@ jobs:
     steps:
     - name: Checkout Repo
       uses: actions/checkout@v2
+    - name: Cache Gradle Wrapper
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/wrapper/
+        key: gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
     - name: Cache Gradle Folders
       uses: actions/cache@v2
       with:
-        path: |
-          ~/.gradle/caches/
-          ~/.gradle/wrapper/
+        path: ~/.gradle/caches/
         key: cache-gradle-${{ matrix.os }}-${{ matrix.jdk }}-${{ hashFiles('detekt-bom/build.gradle.kts') }}
         restore-keys: |
           cache-gradle-${{ matrix.os }}-${{ matrix.jdk }}-
@@ -53,12 +56,15 @@ jobs:
     steps:
     - name: Checkout Repo
       uses: actions/checkout@v2
+    - name: Cache Gradle Wrapper
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/wrapper/
+        key: gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
     - name: Cache Gradle Folders
       uses: actions/cache@v2
       with:
-        path: |
-          ~/.gradle/caches/
-          ~/.gradle/wrapper/
+        path: ~/.gradle/caches/
         key: cache-gradle-ubuntu-latest-11-verifygenerator-${{ hashFiles('detekt-bom/build.gradle.kts') }}
         restore-keys: |
           cache-gradle-ubuntu-latest-11-verifygenerator-
@@ -79,12 +85,15 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
+      - name: Cache Gradle Wrapper
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/wrapper/
+          key: gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
       - name: Cache Gradle Folders
         uses: actions/cache@v2
         with:
-          path: |
-            ~/.gradle/caches/
-            ~/.gradle/wrapper/
+          path: ~/.gradle/caches/
           key: cache-gradle-ubuntu-latest-11-compiletestsnippets-${{ hashFiles('detekt-bom/build.gradle.kts') }}
           restore-keys: |
             cache-gradle-ubuntu-latest-11-compiletestsnippets-

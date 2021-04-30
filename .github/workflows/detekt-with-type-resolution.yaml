@@ -15,17 +15,18 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
-
+      - name: Cache Gradle Wrapper
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/wrapper/
+          key: gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
       - name: Cache Gradle Folders
         uses: actions/cache@v2
         with:
-          path: |
-            ~/.gradle/caches/
-            ~/.gradle/wrapper/
+          path: ~/.gradle/caches/
           key: cache-gradle-${{ hashFiles('detekt-bom/build.gradle.kts') }}
           restore-keys: |
             cache-gradle-
-
       - name: Setup Java
         uses: actions/setup-java@v2
         with:
@@ -33,16 +34,13 @@ jobs:
           distribution: 'adopt'
       - name: Package executable jar
         run: ./gradlew moveJarForIntegrationTest
-
       - name: Run detekt-cli with argsfile
         run: java -jar ./build/detekt-cli-all.jar "@./config/detekt/argsfile"
-
       - name: Upload SARIF to Github using the upload-sarif action
         uses: github/codeql-action/upload-sarif@v1
         if: ${{ always() }}
         with:
           sarif_file: build/detekt-report.sarif
-
 
   gradle:
     runs-on: ubuntu-latest
@@ -50,13 +48,15 @@ jobs:
     steps:
     - name: Checkout Repo
       uses: actions/checkout@v2
-
+    - name: Cache Gradle Wrapper
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/wrapper/
+        key: gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
     - name: Cache Gradle Folders
       uses: actions/cache@v2
       with:
-        path: |
-          ~/.gradle/caches/
-          ~/.gradle/wrapper/
+        path: ~/.gradle/caches/
         key: cache-gradle-${{ hashFiles('detekt-bom/build.gradle.kts') }}
         restore-keys: |
           cache-gradle-
