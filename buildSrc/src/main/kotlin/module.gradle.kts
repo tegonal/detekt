@@ -66,8 +66,8 @@ dependencies {
     testImplementation("org.reflections:reflections")
     testImplementation("io.mockk:mockk")
 
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.7.1")
+    testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:2.0.15")
 }
 
 java {

@@ -14,6 +14,16 @@ plugins {
 allprojects {
     group = "io.gitlab.arturbosch.detekt"
     version = Versions.currentOrSnapshot()
+
+    // This task is used in CI to resolve all dependencies, download them and store them in a cache for reuse
+    tasks.register("resolveDependencies") {
+        group = "build setup"
+        description = "Resolve and prefetch dependencies"
+        doLast {
+            project.buildscript.configurations.filter(Configuration::isCanBeResolved).forEach(Configuration::resolve)
+            project.configurations.filter(Configuration::isCanBeResolved).forEach(Configuration::resolve)
+        }
+    }
 }
 
 jacoco.toolVersion = Versions.JACOCO

@@ -15,7 +15,7 @@ dependencies {
 
     testFixturesApi(kotlin("stdlib-jdk8"))
 
-    dokkaJekyllPlugin("org.jetbrains.dokka:jekyll-plugin")
+    dokkaJekyllPlugin("org.jetbrains.dokka:jekyll-plugin:1.4.32")
 }
 
 val javaComponent = components["java"] as AdhocComponentWithVariants
