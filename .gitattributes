@@ -2,6 +2,9 @@
 
 *.bat           text eol=crlf
 
+*.gradle.kts    text eol=lf
+*.properties    text eol=lf
+
 *.css           diff=css
 *.htm           eol=lf diff=html
 *.html          eol=lf diff=html
