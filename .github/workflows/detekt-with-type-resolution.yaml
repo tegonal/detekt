@@ -20,13 +20,16 @@ jobs:
         with:
           path: ~/.gradle/wrapper/
           key: gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-      - name: Cache Gradle Folders
+      - name: Cache Gradle Dependencies
         uses: actions/cache@v2
         with:
-          path: ~/.gradle/caches/
-          key: cache-gradle-${{ hashFiles('detekt-bom/build.gradle.kts') }}
-          restore-keys: |
-            cache-gradle-
+          path: ~/.gradle/caches/modules-2
+          key: cache-dependencies-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties', 'detekt-bom/build.gradle.kts', 'buildSrc/build.gradle.kts', 'settings.gradle.kts') }}
+      - name: Cache Gradle Build Cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/caches/build-cache-1
+          key: cache-plain-ubuntu-latest-11-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties', 'detekt-bom/build.gradle.kts', 'buildSrc/build.gradle.kts', 'settings.gradle.kts') }}
       - name: Setup Java
         uses: actions/setup-java@v2
         with:
@@ -41,6 +44,11 @@ jobs:
         if: ${{ always() }}
         with:
           sarif_file: build/detekt-report.sarif
+      - name: Cleanup Gradle Cache
+        # https://docs.gradle.org/current/userguide/dependency_resolution.html#sub:cache_copy
+        run: |
+          rm -f ~/.gradle/caches/modules-2/modules-2.lock
+          rm -f ~/.gradle/caches/modules-2/gc.properties
 
   gradle:
     runs-on: ubuntu-latest
@@ -53,13 +61,16 @@ jobs:
       with:
         path: ~/.gradle/wrapper/
         key: gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-    - name: Cache Gradle Folders
+    - name: Cache Gradle Dependencies
       uses: actions/cache@v2
       with:
-        path: ~/.gradle/caches/
-        key: cache-gradle-${{ hashFiles('detekt-bom/build.gradle.kts') }}
-        restore-keys: |
-          cache-gradle-
+        path: ~/.gradle/caches/modules-2
+        key: cache-dependencies-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties', 'detekt-bom/build.gradle.kts', 'buildSrc/build.gradle.kts', 'settings.gradle.kts') }}
+    - name: Cache Gradle Build Cache
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/caches/build-cache-1
+        key: cache-type-resolution-ubuntu-latest-11-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties', 'detekt-bom/build.gradle.kts', 'buildSrc/build.gradle.kts', 'settings.gradle.kts') }}
     - name: Setup Java
       uses: actions/setup-java@v2
       with:
@@ -67,3 +78,8 @@ jobs:
         distribution: 'adopt'
     - name: Run analysis
       run: ./gradlew detektMain detektTest
+    - name: Cleanup Gradle Cache
+      # https://docs.gradle.org/current/userguide/dependency_resolution.html#sub:cache_copy
+      run: |
+        rm -f ~/.gradle/caches/modules-2/modules-2.lock
+        rm -f ~/.gradle/caches/modules-2/gc.properties

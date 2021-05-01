@@ -27,15 +27,16 @@ jobs:
       with:
         path: ~/.gradle/wrapper/
         key: gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-    - name: Cache Gradle Folders
+    - name: Cache Gradle Dependencies
       uses: actions/cache@v2
       with:
-        path: ~/.gradle/caches/
-        key: cache-gradle-${{ matrix.os }}-${{ matrix.jdk }}-${{ hashFiles('detekt-bom/build.gradle.kts') }}
-        restore-keys: |
-          cache-gradle-${{ matrix.os }}-${{ matrix.jdk }}-
-          cache-gradle-${{ matrix.os }}-
-          cache-gradle-
+        path: ~/.gradle/caches/modules-2
+        key: cache-dependencies-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties', 'detekt-bom/build.gradle.kts', 'buildSrc/build.gradle.kts', 'settings.gradle.kts') }}
+    - name: Cache Gradle Build Cache
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/caches/build-cache-1
+        key: cache-build-${{ matrix.os }}-${{ matrix.jdk }}-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', '**/gradle.properties', 'gradle/**') }}
     - name: Setup Java
       uses: actions/setup-java@v2
       with:
@@ -50,6 +51,11 @@ jobs:
     - name: Verify Generated Detekt Config File
       if: ${{ matrix.jdk == '11' && matrix.os == 'ubuntu-latest' }}
       run: ./gradlew verifyGeneratorOutput
+    - name: Cleanup Gradle Cache
+      # https://docs.gradle.org/current/userguide/dependency_resolution.html#sub:cache_copy
+      run: |
+        rm -f ~/.gradle/caches/modules-2/modules-2.lock
+        rm -f ~/.gradle/caches/modules-2/gc.properties
 
   compile-test-snippets:
     if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
@@ -62,16 +68,16 @@ jobs:
         with:
           path: ~/.gradle/wrapper/
           key: gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-      - name: Cache Gradle Folders
+      - name: Cache Gradle Dependencies
         uses: actions/cache@v2
         with:
-          path: ~/.gradle/caches/
-          key: cache-gradle-ubuntu-latest-11-compiletestsnippets-${{ hashFiles('detekt-bom/build.gradle.kts') }}
-          restore-keys: |
-            cache-gradle-ubuntu-latest-11-compiletestsnippets-
-            cache-gradle-ubuntu-latest-11-
-            cache-gradle-ubuntu-latest-
-            cache-gradle-
+          path: ~/.gradle/caches/modules-2
+          key: cache-dependencies-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties', 'detekt-bom/build.gradle.kts', 'buildSrc/build.gradle.kts', 'settings.gradle.kts') }}
+      - name: Cache Gradle Build Cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/caches/build-cache-1
+          key: cache-compile-test-snippets-ubuntu-latest-11-${{ hashFiles('**/*.gradle', '**/*.gradle.kts', '**/gradle.properties', 'gradle/**') }}
       - name: Setup Java
         uses: actions/setup-java@v2
         with:
@@ -79,3 +85,8 @@ jobs:
           distribution: 'adopt'
       - name: Build and compile test snippets
         run: ./gradlew test -x ":detekt-gradle-plugin:test" -Pcompile-test-snippets=true
+      - name: Cleanup Gradle Cache
+        # https://docs.gradle.org/current/userguide/dependency_resolution.html#sub:cache_copy
+        run: |
+          rm -f ~/.gradle/caches/modules-2/modules-2.lock
+          rm -f ~/.gradle/caches/modules-2/gc.properties
