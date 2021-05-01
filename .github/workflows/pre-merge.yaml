@@ -47,36 +47,8 @@ jobs:
       run: java -jar ./build/detekt-cli-all.jar --help
     - name: Run detekt-cli with argsfile
       run: java -jar ./build/detekt-cli-all.jar "@./config/detekt/argsfile"
-
-  verify-generated-config-file:
-    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
-    runs-on: ubuntu-latest
-    env:
-      GRADLE_OPTS: -Dorg.gradle.daemon=false
-    steps:
-    - name: Checkout Repo
-      uses: actions/checkout@v2
-    - name: Cache Gradle Wrapper
-      uses: actions/cache@v2
-      with:
-        path: ~/.gradle/wrapper/
-        key: gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-    - name: Cache Gradle Folders
-      uses: actions/cache@v2
-      with:
-        path: ~/.gradle/caches/
-        key: cache-gradle-ubuntu-latest-11-verifygenerator-${{ hashFiles('detekt-bom/build.gradle.kts') }}
-        restore-keys: |
-          cache-gradle-ubuntu-latest-11-verifygenerator-
-          cache-gradle-ubuntu-latest-11-
-          cache-gradle-ubuntu-latest-
-          cache-gradle-
-    - name: Setup Java
-      uses: actions/setup-java@v2
-      with:
-        java-version: 11
-        distribution: 'adopt'
     - name: Verify Generated Detekt Config File
+      if: ${{ matrix.jdk == '11' && matrix.os == 'ubuntu-latest' }}
       run: ./gradlew verifyGeneratorOutput
 
   compile-test-snippets:
