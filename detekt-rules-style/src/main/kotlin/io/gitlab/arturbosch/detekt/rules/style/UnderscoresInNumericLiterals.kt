@@ -8,6 +8,7 @@ import io.gitlab.arturbosch.detekt.api.Issue
 import io.gitlab.arturbosch.detekt.api.Rule
 import io.gitlab.arturbosch.detekt.api.Severity
 import io.gitlab.arturbosch.detekt.api.config
+import io.gitlab.arturbosch.detekt.api.configWithFallback
 import io.gitlab.arturbosch.detekt.api.internal.Configuration
 import org.jetbrains.kotlin.psi.KtConstantExpression
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
@@ -19,7 +20,7 @@ import java.util.Locale
 /**
  * This rule detects and reports base 10 numbers above a certain length that should be underscore
  * separated for readability. Underscores that do not make groups of 3 digits are also reported even if their length is
- * under the `acceptableDecimalLength`. For `Serializable` classes or objects, the field `serialVersionUID` is
+ * under the `acceptableLength`. For `Serializable` classes or objects, the field `serialVersionUID` is
  * explicitly ignored. For floats and doubles, anything to the right of the decimal point is ignored.
  *
  * <noncompliant>
@@ -42,7 +43,11 @@ class UnderscoresInNumericLiterals(config: Config = Config.empty) : Rule(config)
     )
 
     @Configuration("Length under which base 10 numbers are not required to have underscores")
-    private val acceptableDecimalLength: Int by config(DEFAULT_ACCEPTABLE_DECIMAL_LENGTH)
+    @Deprecated("Use acceptableLength instead.")
+    private val acceptableDecimalLength: Int by config(5) { it - 1 }
+
+    @Configuration("Maximum number of digits that a number can have and not use underscores")
+    private val acceptableLength: Int by configWithFallback("acceptableDecimalLength", 4)
 
     override fun visitConstantExpression(expression: KtConstantExpression) {
         val normalizedText = normalizeForMatching(expression.text)
@@ -53,7 +58,7 @@ class UnderscoresInNumericLiterals(config: Config = Config.empty) : Rule(config)
 
         val numberString = normalizedText.split('.').first()
 
-        if (numberString.length > acceptableDecimalLength || numberString.contains('_')) {
+        if (numberString.length > acceptableLength || numberString.contains('_')) {
             reportIfInvalidUnderscorePattern(expression, numberString)
         }
     }
@@ -105,6 +110,5 @@ class UnderscoresInNumericLiterals(config: Config = Config.empty) : Rule(config)
         private const val BIN_PREFIX = "0b"
         private const val SERIALIZABLE = "Serializable"
         private const val SERIAL_UID_PROPERTY_NAME = "serialVersionUID"
-        private const val DEFAULT_ACCEPTABLE_DECIMAL_LENGTH = 5
     }
 }
